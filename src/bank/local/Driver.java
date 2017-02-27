@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.sun.accessibility.internal.resources.accessibility;
+
 import bank.InactiveException;
 import bank.OverdrawException;
 
@@ -37,24 +39,45 @@ public class Driver implements bank.BankDriver {
 	static class Bank implements bank.Bank {
 
 		private final Map<String, Account> accounts = new HashMap<>();
-
+		private int accountNumberCounter = 0;
+		
 		@Override
 		public Set<String> getAccountNumbers() {
 			System.out.println("Bank.getAccountNumbers has to be implemented");
-			return new HashSet<String>(); // TODO has to be replaced
+			HashSet<String> accountNumbers = new HashSet<>();
+			
+			for (Account value : accounts.values()) {
+				if(value.isActive()){
+					accountNumbers.add(value.getNumber());
+				}
+			}
+			
+			return accountNumbers; // TODO noch exceptionhandling machen
 		}
 
 		@Override
 		public String createAccount(String owner) {
-			// TODO has to be implemented
+			// TODO exceptoin handling noch machen
+			if(owner == null){
+				return null;
+			}
+			
+			accounts.put(Integer.toString(accountNumberCounter), new Account(owner, Integer.toString(accountNumberCounter)));
+			String returnAccNumber = Integer.toString(accountNumberCounter);
+			++accountNumberCounter;
 			System.out.println("Bank.createAccount has to be implemented");
-			return null;
+			return returnAccNumber;
+			
 		}
 
 		@Override
 		public boolean closeAccount(String number) {
-			// TODO has to be implemented
-			System.out.println("Bank.closeAccount has to be implemented");
+			// TODO excptionandling
+			Account actuelAccount = accounts.get(number);
+			if(actuelAccount.getBalance() == 0 && actuelAccount.isActive()){
+				actuelAccount.active = false;
+				return true;
+			}
 			return false;
 		}
 
@@ -66,7 +89,15 @@ public class Driver implements bank.BankDriver {
 		@Override
 		public void transfer(bank.Account from, bank.Account to, double amount)
 				throws IOException, InactiveException, OverdrawException {
-			// TODO has to be implemented
+			
+			if(!from.isActive() || !to.isActive()) throw new InactiveException();
+			if(amount > from.getBalance()) throw new OverdrawException();
+			if(amount < 0)throw new IllegalArgumentException();
+			
+			from.withdraw(amount);
+			to.deposit(amount);
+			
+			// TODO IOException noch machen
 			System.out.println("Bank.transfer has to be implemented");
 		}
 
@@ -76,10 +107,13 @@ public class Driver implements bank.BankDriver {
 		private String number;
 		private String owner;
 		private double balance;
-		private boolean active = true;
+		private boolean active;
 
-		Account(String owner) {
+		Account(String owner, String accountNumber) {
 			this.owner = owner;
+			this.number = accountNumber;
+			balance = 0;
+			active = true;
 			// TODO account number has to be set here or has to be passed using the constructor
 		}
 
@@ -105,13 +139,20 @@ public class Driver implements bank.BankDriver {
 
 		@Override
 		public void deposit(double amount) throws InactiveException {
-			// TODO has to be implemented
+			// TODO IOException
 			System.out.println("Account.deposit has to be implemented");
+			if(!active) throw new InactiveException();
+			if(amount <0) throw new IllegalArgumentException();
+			balance += amount;
 		}
 
 		@Override
 		public void withdraw(double amount) throws InactiveException, OverdrawException {
-			// TODO has to be implemented
+			// TODO IOExcepotion
+			if(!active) throw new InactiveException();
+			if(amount <0) throw new IllegalArgumentException();
+			if(amount > balance) throw new OverdrawException();
+			balance -= amount;
 			System.out.println("Account.withdraw has to be implemented");
 		}
 
