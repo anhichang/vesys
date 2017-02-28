@@ -242,7 +242,6 @@ public class BankGUI extends JFrame {
 
 	public void addAccount() {
 		AddAccountDialog addaccount = new AddAccountDialog(this, "Add Account");
-
 		Point loc = getLocation();
 		addaccount.setLocation(loc.x + 50, loc.y + 50);
 		addaccount.setModal(true);
@@ -265,7 +264,6 @@ public class BankGUI extends JFrame {
 				try {
 					Account acc = bank.getAccount(number);
 					accounts.put(number, acc);
-
 					String str = addaccount.getBalance().trim();
 					double amount;
 					if(str.equals("")) amount=0;

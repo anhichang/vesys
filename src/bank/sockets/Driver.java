@@ -122,6 +122,7 @@ public class Driver implements bank.BankDriver {
 			String[] accDaten = as.split("/");
 			Account acc = new Account(accDaten[2], accDaten[0]);
 			try {
+				
 				acc.deposit( Double.parseDouble(accDaten[1]));
 				acc.active = Boolean.parseBoolean(accDaten[3]);
 			} catch (NumberFormatException e) {
@@ -240,7 +241,6 @@ public class Driver implements bank.BankDriver {
 			out.flush();
 			String input = in.readLine();			
 			if(input.equals("wrong")) throw new InactiveException();
-			Bank.reloadAccs();
 		}
 
 		@Override

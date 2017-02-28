@@ -21,9 +21,6 @@ import bank.sockets.DriverServer.Account;
 public class Server {
 
 	static Bank bank;
-
-	private static BufferedReader in;
-	private static PrintWriter out;
 	private static Thread t;
 	public static void main(String args[]) throws IOException {
 		//int address =Integer.parseInt(args[3]);
@@ -39,8 +36,6 @@ public class Server {
 			while (true) {
 				System.out.println("HauptServer start::::");
 				Socket s = server.accept();
-				in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-				out = new PrintWriter(s.getOutputStream(),true);
 				t = new Thread(new EchoHandler(s));
 				t.start();
 			}
@@ -49,16 +44,19 @@ public class Server {
 
 	private static class EchoHandler implements Runnable {
 		private final Socket s;
+		private final BufferedReader in;
+		private final PrintWriter out;
 		
-		private EchoHandler(Socket s) {
+		private EchoHandler(Socket s) throws IOException {
 			this.s = s;
+			in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+			out = new PrintWriter(s.getOutputStream(),true); ;
 		}
 
 		public void run() {
 			String input;
 			System.out.println("connection from " + s);
 			try {
-				in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 				System.out.println("HauptServer:::::::::");
 				input = in.readLine();
 				while (input != null && !input.equals("")) {
