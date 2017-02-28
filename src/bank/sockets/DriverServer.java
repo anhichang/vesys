@@ -40,9 +40,7 @@ public class DriverServer implements bank.BankDriver {
 	static class Bank implements bank.Bank {
 
 		private final Map<String, Account> accounts = new HashMap<>();
-		
-		private int accountNumberCounter = 0;
-			
+					
 		@Override
 		public Set<String> getAccountNumbers() {
 			System.out.println("DriverServer: Bank.getAccountNumbers");
@@ -59,22 +57,18 @@ public class DriverServer implements bank.BankDriver {
 		
 		@Override
 		public String createAccount(String owner) {
-			// TODO exceptoin handling noch machen
 			if(owner == null){
 				return null;
 			}
-			
-			accounts.put(Integer.toString(accountNumberCounter), new Account(owner, Integer.toString(accountNumberCounter)));
-			String returnAccNumber = Integer.toString(accountNumberCounter);
-			++accountNumberCounter;
+		    final Account acc = new Account(owner);
+		    accounts.put(acc.getNumber(), acc);	
 			System.out.println("DriverServer: Bank.createAccount");
-			return returnAccNumber;
+			return acc.getNumber();
 			
 		}
 
 		@Override
 		public boolean closeAccount(String number) {
-			// TODO excptionandling		
 			Account actuelAccount = accounts.get(number);
 			if(actuelAccount.getBalance() == 0 && actuelAccount.isActive()){
 				actuelAccount.active = false;
@@ -108,14 +102,13 @@ public class DriverServer implements bank.BankDriver {
 	static class Account implements bank.Account {
 		private String number;
 		private String owner;
-		private double balance;
-		private boolean active;
-
-		Account(String owner, String accountNumber) {
+		private double balance =0;
+		private boolean active = true;
+		private static int iDCountter = 0;
+		
+		Account(String owner) {
 			this.owner = owner;
-			this.number = accountNumber;
-			balance = 0;
-			active = true;
+			this.number = "CS_" + iDCountter++;
 			// TODO account number has to be set here or has to be passed using the constructor
 		}
 
@@ -151,7 +144,7 @@ public class DriverServer implements bank.BankDriver {
 		public void withdraw(double amount) throws InactiveException, OverdrawException {
 			if(!active) throw new InactiveException();
 			if(amount <0) throw new IllegalArgumentException();
-			if(amount > balance) throw new OverdrawException();
+			if(balance-amount <0) throw new OverdrawException();
 			balance -= amount;
 			System.out.println("DriverServer: Account.withdraw");
 		}

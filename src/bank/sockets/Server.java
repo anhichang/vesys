@@ -22,6 +22,7 @@ public class Server {
 
 	static Bank bank;
 	private static Thread t;
+	
 	public static void main(String args[]) throws IOException {
 		//int address =Integer.parseInt(args[3]);
 		System.out.println("HauptServer");
@@ -34,20 +35,19 @@ public class Server {
 		try (ServerSocket server = new ServerSocket(port)) {
 			System.out.println("HauptServer: Startet Server on port " + port);
 			while (true) {
-				System.out.println("HauptServer start::::");
 				Socket s = server.accept();
-				t = new Thread(new EchoHandler(s));
+				t = new Thread(new ClientHandler(s));
 				t.start();
 			}
 		}
 	}
 
-	private static class EchoHandler implements Runnable {
+	private static class ClientHandler implements Runnable {
 		private final Socket s;
 		private final BufferedReader in;
 		private final PrintWriter out;
 		
-		private EchoHandler(Socket s) throws IOException {
+		private ClientHandler(Socket s) throws IOException {
 			this.s = s;
 			in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 			out = new PrintWriter(s.getOutputStream(),true); ;
@@ -57,59 +57,62 @@ public class Server {
 			String input;
 			System.out.println("connection from " + s);
 			try {
-				System.out.println("HauptServer:::::::::");
 				input = in.readLine();
 				while (input != null && !input.equals("")) {
 				System.out.println("Server input: " + input);
 				String[] inputs = input.split("/");	
-				System.out.println("Argument0: " + (inputs[0]).toLowerCase());
-				System.out.println("Server Bank ObjectReferenze: " + bank);
-
 				switch((inputs[0]).toLowerCase()){ 
 		        case "createacc": 
-		        	System.out.println("case: createAcc");
-		        	System.out.println("createAcc owner: " + inputs[1]);
 		            String accNumber = bank.createAccount(inputs[1]);
-		            out.write(accNumber+ '\n');
+		            out.println(accNumber);
 		            out.flush();
 		            break; 
 		            
 		        case "close": 
-		        	System.out.println("close");
 		            boolean closedOpen= bank.closeAccount(inputs[1]);
-		            out.write(Boolean.toString(closedOpen) + '\n');
+		            out.println(Boolean.toString(closedOpen));
 		            out.flush();
 		            break;
-		        case "transfer": 
-		        	System.out.println("case: transfer");
-		        	try{
-			            bank.transfer(bank.getAccount(inputs[1]), bank.getAccount(inputs[2]), Double.parseDouble(inputs[3]));
-		        	}catch (Exception e) {
-						System.out.println(e);
+		        case "transfer": 		
+					try {
+						bank.transfer(bank.getAccount(inputs[1]), bank.getAccount(inputs[2]), Double.parseDouble(inputs[3]));
+						out.println("ok");
+						out.flush();
+					} catch (NumberFormatException e2) {
+						out.println("NumberFormatException");
+						out.flush();
+						e2.printStackTrace();
+					} catch (IllegalArgumentException e2) {
+						out.println("IllegalArgumentException");
+						out.flush();
+						e2.printStackTrace();
+					} catch (OverdrawException e2) {
+						out.println("OverdrawException");
+						out.flush();
+						e2.printStackTrace();
+					} catch (InactiveException e2) {
+						out.println("InactiveException");
+						out.flush();
+						e2.printStackTrace();
 					}
+
 		            break; 
-		        case "getacc": 
-		        	System.out.println("case: getacc");
-		       
+		        case "getacc": 		       
 		        	if(inputs.length ==1){
 		        		out.println("null");
 		        		out.flush();
-		        		System.out.println("......");
 		        		break;
 		        	}
 		        	Account acc = (Account) bank.getAccount(inputs[1]);	
 		        	if(acc!= null){		        	
-		        	out.println(acc.getNumber() + "/" + acc.getBalance() + "/"  + acc.getOwner() + "/"+ acc.isActive() + "/");
-		        	System.out.println("case: getacc: " +acc.getNumber() + "/" + acc.getBalance() + "/"  + acc.getOwner() + "/"+ acc.isActive() + "/" );
+		        	out.println(acc.getNumber() + "/" + acc.getBalance() + "/"  + acc.getOwner() + "/"+ acc.isActive());
 		        	out.flush();
 		        	}else{
 		        		out.println("null");
 		        		out.flush();
 		        	}
-		        	System.out.println("end of getacc-case");
 		        	break;
 		        case "getaccountnumbers":
-		        	System.out.println("case: getAccountNumbers");
 		        	Set<String> accNum = bank.getAccountNumbers();
 		        	if(accNum.size()==0){
 		        		out.println("null");
@@ -119,86 +122,90 @@ public class Server {
 		        	String allAccountNumber = "";
 		        	for(String acc1: accNum){
 		        		allAccountNumber += acc1 + "/";
-		        		System.out.println(allAccountNumber);
 		        	}
 		        	out.println(allAccountNumber);
 		        	out.flush();
 		        	break;
 		        case "getbank":	
-		        	System.out.println("case: getbank");
 		        	String bk = "";
 		        	Set<String> accNumbers = bank.getAccountNumbers();
 		        	
 		        	for(String accNumb: accNumbers){
-		        		System.out.println(accNumb);
 		        		bk = bk + accNumb + "/"+ bank.getAccount(accNumb).getOwner()+ "/";
 		        	} 
-		        	System.out.println("getbank case: " + bk);
-		        	out.println((bk));
+		        	out.println(bk);
 		        	out.flush();
-		        	System.out.println("end of case: getbank");
 		        	break;
 		        case "getbalance":	
-		        	System.out.println("case: getBalance");
 		        	double balance = bank.getAccount(inputs[1]).getBalance();
-		        	out.println(Double.toString(balance));
+		        	out.println(balance);
 		        	out.flush();
-		        	System.out.println("end of case: getBalance");
 		        	break;	
 		        case "getowner":	
-		        	System.out.println("case: getOwner");
 		        	String owner = bank.getAccount(inputs[1]).getOwner();
 		        	out.println(owner);
 		        	out.flush();
-		        	System.out.println("end of case: owner");
 		        	break;	
 		        case "getnumber":	
-		        	System.out.println("case: getNumber");
 		        	String number = bank.getAccount(inputs[1]).getNumber();
 		        	out.println(number);
 		        	out.flush();
-		        	System.out.println("end of case: getNumber");
 		        	break;	 
 		        case "isactive":	
-		        	System.out.println("case: isActive");
 		        	Boolean active = bank.getAccount(inputs[1]).isActive();
 		        	out.println(Boolean.toString(active));
 		        	out.flush();
-		        	System.out.println("end of case: isActive");
 		        	break;
 		        case "deposit":	
-		        	System.out.println("case: deposit");		        	
 					try {
+						if(inputs.length==3 && bank.getAccountNumbers().size() > 0){
 						bank.getAccount(inputs[1]).deposit(Double.parseDouble(inputs[2]));
+						
 						out.println("ok");
 						out.flush();
-					} catch (NumberFormatException e1) {
-						// TODO Auto-generated catch block
+						System.out.println("---------");
+						}else{
+							out.println("InactiveException");
+							out.flush();
+						}						
+					}catch (NumberFormatException e1) {
+						out.println("NumberFormatException");
+						out.flush();
 						e1.printStackTrace();
 					} catch (IllegalArgumentException e1) {
-						out.println("wrong");
+						out.println("IllegalArgumentException");
 						out.flush();
 						e1.printStackTrace();
 					} catch (InactiveException e1) {
-						out.println("wrong");
+						out.println("InactiveException");
 						out.flush();
 						e1.printStackTrace();
-					}	
-
-		        	System.out.println("end of case: deposit");
+					}
 		        	break;	
 		        case "withdraw":	
-		        	System.out.println("case: withdraw");			
 					try {
 						bank.getAccount(inputs[1]).withdraw(Double.parseDouble(inputs[2]));
-					} catch (IllegalArgumentException | OverdrawException | InactiveException e) {
-						// TODO Auto-generated catch block
+						out.println("ok");
+						out.flush();
+					} catch (NumberFormatException e) {
+						out.println("NumberFormatException");
+						out.flush();
 						e.printStackTrace();
-					}		
-		        	System.out.println("end of case: withdraw");
+					} catch (IllegalArgumentException e) {
+						out.println("IllegalArgumentException");
+						out.flush();
+						e.printStackTrace();
+					} catch (OverdrawException e) {
+						out.println("OverdrawException");
+						out.flush();
+						e.printStackTrace();
+					} catch (InactiveException e) {
+						out.println("InactiveException");
+						out.flush();
+						e.printStackTrace();
+					}
 		        	break;
 		        case "reloadaccs":
-		        	System.out.println("case: reloadaccs");	
 		        	String returnAccs = "";
 		        	Set<String> accs = bank.getAccountNumbers();
 		        	for(String accs1: accs){
