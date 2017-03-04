@@ -27,7 +27,6 @@ public class Server {
 		//int address =Integer.parseInt(args[3]);
 		System.out.println("HauptServer");
 		int port =Integer.parseInt(args[4]);
-		//int clientPort = 5678;
 		DriverServer driver = new DriverServer();
 		driver.connect(args); 
 		bank = driver.getBank();
@@ -163,7 +162,6 @@ public class Server {
 						
 						out.println("ok");
 						out.flush();
-						System.out.println("---------");
 						}else{
 							out.println("InactiveException");
 							out.flush();

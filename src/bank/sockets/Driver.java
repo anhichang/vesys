@@ -43,18 +43,13 @@ public class Driver implements bank.BankDriver {
 			port = Integer.parseInt(args[1]);
 		}
 		System.out.println("LocalDriver: connecting to " + host + ":" + port);
-
 		s = new Socket(host, port);
-
 		in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		out = new PrintWriter(s.getOutputStream(), true);
-		;
 
 		// null means any network interface
 		// 0 means any port
-
 		System.out.println("LocalDriver: connected to " + s.getRemoteSocketAddress());
-
 	}
 
 	@Override
@@ -137,34 +132,6 @@ public class Driver implements bank.BankDriver {
 			if (input.equals("IllegalArgumentException"))
 				throw new IllegalArgumentException();
 		}
-
-//		public static void reloadAccs() throws IOException {
-//			System.out.println("LocalDriver: reloadAccs-method");
-//			if (accounts.size() > 0) {
-//
-//				out.println("reloadaccs/");
-//				out.flush();
-//				String reloadedAccs = in.readLine();
-//				String[] reload = reloadedAccs.split("/");
-//				System.out.println(reload[0] + " ..........");
-//				for (int i = 0; i < reload.length - 4; i++) {
-//					Account acc = new Account(reload[2]);
-//					try {
-//						acc.deposit(Double.parseDouble(reload[1]));
-//					} catch (NumberFormatException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					} catch (InactiveException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//					acc.active = Boolean.parseBoolean(reload[3]);
-//					accounts.put(reload[0], acc);
-//				}
-//			} else {
-//				accounts = new HashMap<String, Driver.Account>();
-//			}
-//		}
 	}
 
 	static class Account implements bank.Account {
