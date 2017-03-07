@@ -66,6 +66,8 @@ public class Driver implements bank.BankDriver {
 		@Override
 		public boolean closeAccount(String number) {
 			Account actuelAccount = accounts.get(number);
+			if(actuelAccount == null) return false;
+
 			if (actuelAccount.getBalance() == 0 && actuelAccount.isActive()) {
 				actuelAccount.active = false;
 				return true;
@@ -96,8 +98,8 @@ public class Driver implements bank.BankDriver {
 	}
 
 	static class Account implements bank.Account {
-		private String number;
-		private String owner;
+		private final String number;
+		private final String owner;
 		private double balance = 0;
 		private boolean active = true;
 		private static int iDCountter = 0;
