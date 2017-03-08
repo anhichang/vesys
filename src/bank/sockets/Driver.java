@@ -152,6 +152,8 @@ public class Driver implements bank.BankDriver {
 			out.println("getbalance/" + this.number);
 			out.flush();
 			String balan = in.readLine();
+			if (balan.equals("null"))
+				return 0;
 			return Double.parseDouble(balan);
 		}
 
@@ -160,15 +162,15 @@ public class Driver implements bank.BankDriver {
 			out.println("getowner/" + this.number + '/');
 			out.flush();
 			String owner = in.readLine();
+			if (owner.equals("null"))
+				return null;
 			return owner;
 		}
 
 		@Override
 		public String getNumber() throws IOException {
-			out.println("getnumber/" + this.number);
-			out.flush();
-			String owner = in.readLine();
-			return owner;
+
+			return this.number;
 		}
 
 		@Override
@@ -184,7 +186,7 @@ public class Driver implements bank.BankDriver {
 			out.println("deposit/" + this.number + "/" + amount);
 			out.flush();
 			String input = in.readLine();
-			if (input.equals("InactiveException"))
+			if (input.equals("null") || input.equals("InactiveException"))
 				throw new InactiveException();
 			if (input.equals("IllegalArgumentException"))
 				throw new IllegalArgumentException();

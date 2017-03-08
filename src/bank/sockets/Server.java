@@ -20,13 +20,12 @@ import bank.sockets.DriverServer.Account;
 
 public class Server {
 
-	static Bank bank;
+	private static Bank bank;
 	private static Thread t;
 	
 	public static void main(String args[]) throws IOException {
 		//int address =Integer.parseInt(args[3]);
-		System.out.println("HauptServer");
-		int port =Integer.parseInt(args[4]);
+		int port =Integer.parseInt(args[1]);
 		DriverServer driver = new DriverServer();
 		driver.connect(args); 
 		bank = driver.getBank();
@@ -125,31 +124,20 @@ public class Server {
 		        	out.println(allAccountNumber);
 		        	out.flush();
 		        	break;
-		        case "getbank":	
-		        	String bk = "";
-		        	Set<String> accNumbers = bank.getAccountNumbers();
-		        	
-		        	for(String accNumb: accNumbers){
-		        		bk = bk + accNumb + "/"+ bank.getAccount(accNumb).getOwner()+ "/";
-		        	} 
-		        	out.println(bk);
-		        	out.flush();
-		        	break;
 		        case "getbalance":	
-		        	double balance = bank.getAccount(inputs[1]).getBalance();
+		        	Account accBalance = (Account) bank.getAccount(inputs[1]);
+		        	if(accBalance == null) out.println("null");
+		        	double balance = accBalance.getBalance();
 		        	out.println(balance);
 		        	out.flush();
 		        	break;	
 		        case "getowner":	
-		        	String owner = bank.getAccount(inputs[1]).getOwner();
+		        	Account accOwner = (Account) bank.getAccount(inputs[1]);
+		        	if(accOwner == null) out.println("null");
+		        	String owner = accOwner.getOwner();
 		        	out.println(owner);
 		        	out.flush();
 		        	break;	
-		        case "getnumber":	
-		        	String number = bank.getAccount(inputs[1]).getNumber();
-		        	out.println(number);
-		        	out.flush();
-		        	break;	 
 		        case "isactive":	
 		        	Boolean active = bank.getAccount(inputs[1]).isActive();
 		        	out.println(Boolean.toString(active));
@@ -157,15 +145,14 @@ public class Server {
 		        	break;
 		        case "deposit":	
 					try {
-						if(inputs.length==3 && bank.getAccountNumbers().size() > 0){
-						bank.getAccount(inputs[1]).deposit(Double.parseDouble(inputs[2]));
-						
-						out.println("ok");
-						out.flush();
-						}else{
+						Account accDeposit = (Account) bank.getAccount(inputs[1]);
+						if(accDeposit == null){
 							out.println("InactiveException");
 							out.flush();
-						}						
+						}					 
+						accDeposit.deposit(Double.parseDouble(inputs[2]));						
+						out.println("ok");
+						out.flush();						
 					}catch (NumberFormatException e1) {
 						out.println("NumberFormatException");
 						out.flush();
@@ -203,18 +190,8 @@ public class Server {
 						e.printStackTrace();
 					}
 		        	break;
-		        case "reloadaccs":
-		        	String returnAccs = "";
-		        	Set<String> accs = bank.getAccountNumbers();
-		        	for(String accs1: accs){
-		        		Account ac = (Account) bank.getAccount(accs1);
-		        		returnAccs+= ac.getNumber() + '/' + ac.getBalance()+ '/' + ac.getOwner() + '/' + ac.isActive() + '/';
-		        	}
-		        	out.println(returnAccs);
-		        	out.flush();
-		        	break;
 		        default: 
-		            System.out.println("falsche eingaben"); 
+		            throw new IllegalArgumentException();
 				}
 				input = in.readLine();
 				}
