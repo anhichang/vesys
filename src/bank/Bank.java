@@ -8,6 +8,8 @@ package bank;
 import java.io.IOException;
 import java.util.Set;
 
+import javax.jws.WebService;
+
 /**
  * The <code>Bank</code> interface describes the functionality of a bank. Using
  * this interface, new accounts can be created and existing accounts can be
@@ -17,6 +19,7 @@ import java.util.Set;
  * @author Dominik Gruntz
  * @version 3.0
  */
+@WebService
 public interface Bank {
 
 	/**

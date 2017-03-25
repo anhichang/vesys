@@ -7,6 +7,8 @@ package bank;
 
 import java.io.IOException;
 
+import javax.jws.WebService;
+
 /**
  * The Account interface represents a single account. It can be used to deposit
  * and withdraw money. The amounts are always given in Swiss Francs. References
@@ -16,6 +18,7 @@ import java.io.IOException;
  * @author Dominik Gruntz
  * @version 3.0
  */
+@WebService
 public interface Account {
 
 	/**

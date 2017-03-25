@@ -50,7 +50,6 @@ public class DriverServer implements bank.BankDriver {
 					accountNumbers.add(value.getNumber());
 				}
 			}
-
 			return accountNumbers;
 		}
 
@@ -97,7 +96,6 @@ public class DriverServer implements bank.BankDriver {
 			to.deposit(amount);
 
 		}
-
 	}
 
 	static class Account implements bank.Account {
