@@ -11,17 +11,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jws.WebService;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.sun.accessibility.internal.resources.accessibility;
-
 import bank.InactiveException;
 import bank.OverdrawException;
 
 public class Driver implements bank.BankDriver {
-	
 	private Bank bank = null;
 
 	@Override
@@ -36,16 +29,18 @@ public class Driver implements bank.BankDriver {
 		System.out.println("DriverServer: disconnected...");
 	}
 
-	public Bank getBankSoap(){
-		bank = new Bank();
-		return bank;
-	}
 	@Override
 	public Bank getBank() {
 		return bank;
 	}
+	
+	public Bank getBankSoap(){
+		if(bank == null){
+			bank = new Bank();
+		}
+		return bank;
+	}
 
-	@WebService
 	static class Bank implements bank.Bank {
 
 		private final Map<String, Account> accounts = new HashMap<>();
@@ -69,7 +64,6 @@ public class Driver implements bank.BankDriver {
 			}
 			final Account acc = new Account(owner);
 			accounts.put(acc.getNumber(), acc);
-			
 			return acc.getNumber();
 
 		}
@@ -90,6 +84,7 @@ public class Driver implements bank.BankDriver {
 		public bank.Account getAccount(String number) {
 			return accounts.get(number);
 		}
+		
 
 		@Override
 		public void transfer(bank.Account from, bank.Account to, double amount)
@@ -107,7 +102,7 @@ public class Driver implements bank.BankDriver {
 		}
 
 	}
-	@WebService
+
 	static class Account implements bank.Account {
 		private final String number;
 		private final String owner;
