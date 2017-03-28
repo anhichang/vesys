@@ -3,7 +3,7 @@
  * All Rights Reserved. 
  */
 
-package bank.soap;
+package bank.local;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -11,20 +11,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.jws.WebService;
 import bank.InactiveException;
 import bank.OverdrawException;
-import bank.soap.client.jaxws.ServiceImplService;
-import bank.soap.client.jaxws.IOException_Exception;
-import bank.soap.client.jaxws.InactiveException_Exception;
-import bank.soap.client.jaxws.OverdrawException_Exception;
-import bank.soap.client.jaxws.ServiceImpl;
+
 public class Driver implements bank.BankDriver {
 	private Bank bank = null;
-	
-	private static ServiceImplService service = new ServiceImplService();
-	private static ServiceImpl port = service.getServiceImplPort();
-	
+
 	@Override
 	public void connect(String[] args) {
 		bank = new Bank();
@@ -36,67 +28,86 @@ public class Driver implements bank.BankDriver {
 		bank = null;
 		System.out.println("DriverServer: disconnected...");
 	}
-	
+
 	@Override
 	public Bank getBank() {
 		return bank;
 	}
+	
+	public Bank getBankSoap(){
+		if(bank == null){
+			bank = new Bank();
+		}
+		return bank;
+	}
 
-	@WebService
 	static class Bank implements bank.Bank {
 
+		private final Map<String, Account> accounts = new HashMap<>();
+
 		@Override
-		public Set<String> getAccountNumbers() throws IOException  {
-			try {
-				return new HashSet<String>(port.getAccountNumbers());
-			} catch (IOException_Exception e) {
-				throw new IOException();
+		public Set<String> getAccountNumbers() {
+			HashSet<String> accountNumbers = new HashSet<>();
+
+			for (Account value : accounts.values()) {
+				if (value.isActive()) {
+					accountNumbers.add(value.getNumber());
+				}
 			}
+			return accountNumbers;
 		}
 
 		@Override
-		public String createAccount(String owner) throws IOException {
-			try {
-				return port.createAccount(owner);
-			} catch (IOException_Exception e) {
-				throw new IOException();
+		public String createAccount(String owner) {
+			if (owner == null) {
+				return null;
 			}
+			final Account acc = new Account(owner);
+			accounts.put(acc.getNumber(), acc);
+			return acc.getNumber();
+
 		}
 
 		@Override
-		public boolean closeAccount(String number) throws IOException {
-			try {
-				return port.closeAccount(number);
-			} catch (IOException_Exception e) {
-				throw new IOException();
+		public boolean closeAccount(String number) {
+			Account actuelAccount = accounts.get(number);
+			if(actuelAccount == null) return false;
+
+			if (actuelAccount.getBalance() == 0 && actuelAccount.isActive()) {
+				actuelAccount.active = false;
+				return true;
 			}
+			return false;
 		}
 
 		@Override
-		public bank.Account getAccount(String number) throws IOException {
-			try {
-				if(port.getAccountNumbers().contains(number)) return new Account(number);
-				else return null;
-			} catch (IOException_Exception e) {
-				throw new IOException();
-			}
+		public bank.Account getAccount(String number) {
+			return accounts.get(number);
 		}
+		
 
 		@Override
 		public void transfer(bank.Account from, bank.Account to, double amount)
 				throws IOException, InactiveException, OverdrawException {
-			try {
-				port.transfer(from.getNumber(), to.getNumber(), amount);
-			} catch (IOException_Exception | InactiveException_Exception | OverdrawException_Exception e) {
-				throw new IOException();
-			}
-			}
+
+			if (!from.isActive() || !to.isActive())
+				throw new InactiveException();
+			if (amount > from.getBalance())
+				throw new OverdrawException();
+			if (amount < 0)
+				throw new IllegalArgumentException();
+
+			from.withdraw(amount);
+			to.deposit(amount);
+		}
+
 	}
-	
-	@WebService
+
 	static class Account implements bank.Account {
 		private final String number;
 		private final String owner;
+		private double balance = 0;
+		private boolean active = true;
 		private static int iDCountter = 0;
 
 		Account(String owner) {
@@ -105,53 +116,45 @@ public class Driver implements bank.BankDriver {
 		}
 
 		@Override
-		public double getBalance() throws IOException {
-			try {
-				return port.getBalance(this.number);
-			} catch (IOException_Exception e) {
-				throw new IOException();
-			}
+		public double getBalance() {
+			return balance;
 		}
 
 		@Override
-		public String getOwner() throws IOException {
-			try {
-				return port.getOwner(this.number);
-			} catch (IOException_Exception e) {
-				throw new IOException();
-			}
+		public String getOwner() {
+			return owner;
 		}
 
 		@Override
-		public String getNumber() throws IOException{
-			return this.number;
+		public String getNumber() {
+			return number;
 		}
 
 		@Override
-		public boolean isActive() throws IOException {
-			try {
-				return port.isActive(number);
-			} catch (IOException_Exception e) {
-				throw new IOException();
-			}
+		public boolean isActive() {
+			return active;
 		}
 
 		@Override
-		public void deposit(double amount) throws IOException{
-			try {
-				port.deposit(this.number, amount);
-			} catch (IOException_Exception | InactiveException_Exception e) {
-				throw new IOException();
-			}
+		public void deposit(double amount) throws InactiveException {
+			if (!this.active)
+				throw new InactiveException();
+			if (amount < 0)
+				throw new IllegalArgumentException();
+			balance += amount;
 		}
 
 		@Override
-		public void withdraw(double amount) throws IOException {
-			try {
-				port.withdraw(number, amount);
-			} catch (IOException_Exception | InactiveException_Exception | OverdrawException_Exception e) {
-				throw new IOException();
-			}
+		public void withdraw(double amount) throws InactiveException, OverdrawException {
+			if (!active)
+				throw new InactiveException();
+			if (amount < 0)
+				throw new IllegalArgumentException();
+			if (balance - amount < 0)
+				throw new OverdrawException();
+			balance -= amount;
 		}
+
 	}
+
 }

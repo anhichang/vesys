@@ -1,4 +1,4 @@
-package bank.soap;
+package bank.soap.server;
 
 import java.io.IOException;
 import java.util.Set;
@@ -6,7 +6,6 @@ import java.util.Set;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 
-import bank.Account;
 import bank.Bank;
 import bank.InactiveException;
 import bank.OverdrawException;
@@ -17,12 +16,14 @@ import bank.local.Driver;
 public class ServiceImpl implements Service{
 	
 	private Driver localDriver =new Driver();
+	
 	private Bank bank = localDriver.getBankSoap();
 
 	@Override
 	public Set<String> getAccountNumbers() throws IOException {
 		return bank.getAccountNumbers();
 	}
+
 
 	@Override
 	public String createAccount(@WebParam(name = "owner") String owner) throws IOException {
@@ -33,11 +34,14 @@ public class ServiceImpl implements Service{
 	public boolean closeAccount(@WebParam(name = "number") String number) throws IOException {
 		return bank.closeAccount(number);
 	}
-
-//	@Override
-//	public Account getAccount(@WebParam(name = "number") String number) throws IOException {
-//		return bank.getAccount(number);
-//	}
+	
+	@Override
+	public boolean getAccount(String number) throws IOException {
+		if(bank.getAccount(number) != null){
+			return true;
+		}
+		return false;
+	}
 
 	@Override
 	public void transfer(@WebParam(name = "from") String from, @WebParam(name = "to") String to, @WebParam(name = "amount") double amount)
