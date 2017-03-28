@@ -70,7 +70,6 @@ public class Driver implements bank.BankDriver {
 			final Account acc = new Account(owner);
 			accounts.put(acc.getNumber(), acc);
 			
-			accounts.put("CS-123", new Account("anhi"));
 			return acc.getNumber();
 
 		}

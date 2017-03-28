@@ -22,5 +22,5 @@ public interface Service {
 	boolean isActive(@WebParam(name = "number") String number) throws IOException;
 	void deposit(@WebParam(name = "number") String number, @WebParam(name = "amount") double amount) throws InactiveException, IllegalArgumentException, IOException;
 	void withdraw(@WebParam(name = "number") String number, @WebParam(name = "amount") double amount) throws InactiveException, OverdrawException, IllegalArgumentException, IOException; 
-	
+
 }
