@@ -21,7 +21,7 @@ public class ClientDriver implements bank.BankDriver {
 	private Bank bank = null;
 	static Client c = ClientBuilder.newClient();
 	static WebTarget r;
-	private static final String BASE_URL = "http://localhost:9999/bank";
+	private static final String BASE_URL = "http://localhost:9998/bank";
 	
 	@Override
 	public void connect(String[] args) throws IOException {

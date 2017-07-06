@@ -12,6 +12,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.UriInfo;
+
+import org.glassfish.grizzly.http.HttpHeader;
 
 import bank.Bank;
 import bank.InactiveException;
@@ -28,6 +33,11 @@ public class bankResource {
 	public bankResource() {
 		System.out.println("BankResource() called");
 	}
+	// @GET
+	// @Path("/bank")
+	// public Response  getUuu(@QueryParam("erste") String erste, @QueryParam("erste") String zweite ){
+	// return null;
+	// }
 	
 	@GET
 	@Path("/accounts")
@@ -53,6 +63,15 @@ public class bankResource {
 		return  accN;	// XXX ich frage mich gerade, ob null richtig übertagen wird, d.h. falls das Konto (aus welchen Gründen auch immer) nicht erzeugt werden konnte.
 						//     => habe es ausprobiert: Auf Klientenseite wird in diesem Fall "" als Resultatstring ausgelesen.
 	}
+	// @POST
+	// @Path("/accountsQueryParam")
+	// @Produces("text/plain")
+	// public String createAccount(@QueryParam("name") String owner, @QueryParam("nummer") int owner ) throws IOException {
+	// String accN = bank.createAccount(owner);
+	// System.out.println("owner " + owner);
+	// System.out.println("accN " + accN);
+	// return  accN;
+	// }
 	
 	@DELETE
 	@Path("/accounts/{number}")
@@ -66,7 +85,11 @@ public class bankResource {
 	@GET
 	@Path("/accounts/{number}")
 	@Produces("text/plain")
-	public String getAccount(@PathParam("number") String number) throws IOException {
+	public String getAccount(@PathParam("number") String number, @Context HttpHeaders header, @Context UriInfo uriInfo) throws IOException {
+		System.out.println("Header: " + header.getRequestHeader("user-agent").get(0));
+		System.out.println(uriInfo.getPath()); //bank/accounts/CS_0
+
+		System.out.println();
 		bank.Account acc = bank.getAccount(number);
 		if (acc != null) {
 			return acc.getNumber() + "/" + acc.getBalance() + "/" + acc.getOwner() + "/"

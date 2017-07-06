@@ -14,7 +14,7 @@ public class Server {
 
 		// @Singleton annotation is respected,
 		// but classes without a @Singleton annotation can also returned as singletons over the application definition
-		final ResourceConfig rc = new ResourceConfig().packages("bank.rest.resources");
+		final ResourceConfig rc = new ResourceConfig().packages("bank.rest.Server");
 		
 		System.out.println("Starting grizzly...");
 		HttpServer httpServer = GrizzlyHttpServerFactory.createHttpServer(URI.create(baseUri), rc);
